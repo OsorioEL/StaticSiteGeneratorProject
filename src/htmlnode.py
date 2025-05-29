@@ -18,7 +18,12 @@ class HTMLNode:
         return props_string
 
     def __repr__(self):
-        return(f"HTMLNode({self.tag},{self.value},{self.children},{self.props})")
+        if type(self) is HTMLNode:
+            return f"HTMLNode({self.tag},{self.value},{self.children},{self.props})"
+        elif type(self) is LeafNode:
+            return(f"LeafNode({self.tag},{self.value},{self.children},{self.props})")
+        else:
+            return(f"ParentNode({self.tag},{self.children},{self.props})")
     
 class LeafNode(HTMLNode):
     def __init__(self, tag, value, props=None):
