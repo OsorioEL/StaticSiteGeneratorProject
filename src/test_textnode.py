@@ -1,6 +1,7 @@
 import unittest
 
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimter
+from htmlnode import LeafNode, ParentNode, HTMLNode
 
 
 class TestTextNode(unittest.TestCase):
@@ -39,6 +40,48 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This is a text node", TextType.BOLD, "https://www.boot.dev")
         self.assertEqual(node.url, node2.url)
         
+    def test_text(self):
+        node = TextNode("This is a text node", TextType.TEXT)
+        html_node = text_node_to_html_node(node)
+        self.assertEqual(html_node.tag, None)
+        self.assertEqual(html_node.value, "This is a text node")
+        
+    def test_split_nodes_delimiter_single_node(self):
+        node = TextNode("This is a text node with delimiters", TextType.TEXT)
+        delimiter = " "
+        text_type = TextType.TEXT
+        new_nodes = split_nodes_delimter([node], delimiter, text_type)
+        self.assertEqual(len(new_nodes), 7)
+        self.assertEqual(new_nodes[0].text, "This")
+        self.assertEqual(new_nodes[1].text, "is")
+        self.assertEqual(new_nodes[2].text, "a")
+        self.assertEqual(new_nodes[3].text, "text")
+        self.assertEqual(new_nodes[4].text, "node")
+        self.assertEqual(new_nodes[5].text, "with")
+        self.assertEqual(new_nodes[6].text, "delimiters")
+        
+    def test_split_nodes_delimiter_with_list_of_nodes(self):
+        node1 = TextNode("This is a text inline `code` text", TextType.TEXT)
+        node2 = TextNode("Another text node with inline `again, code` 'text", TextType.TEXT)
+        delimiter = "`"
+        text_type = TextType.TEXT
+        new_nodes = split_nodes_delimter([node1, node2], delimiter, text_type)
+        #assert new nodes list consists of TextNodes with the text split by the delimiter
+        # and the text type is preserved
+        self.assertEqual(new_nodes[0],TextNode("This is a text inline ", TextType.TEXT))
+        self.assertEqual(new_nodes[1],TextNode("code", TextType.CODE))
+        self.assertEqual(new_nodes[2],TextNode(" text", TextType.TEXT))
+        self.assertEqual(new_nodes[3],TextNode("Another text node with inline ", TextType.TEXT))
+        self.assertEqual(new_nodes[4],TextNode("again, code", TextType.CODE))
+        self.assertEqual(new_nodes[5],TextNode(" 'text", TextType.TEXT))
+        
+    def test_split_nodes_delimiter_raises_exception_on_even_split(self):
+        node = TextNode("This is a text node uneven `code delimiters", TextType.TEXT)
+        delimiter = "`"
+        text_type = TextType.TEXT
+        with self.assertRaises(Exception) as context:
+            split_nodes_delimter([node], delimiter, text_type)
+        self.assertTrue("Unmatched delimiter in: This is a text node uneven `code delimiters" in str(context.exception))
     
         
     
