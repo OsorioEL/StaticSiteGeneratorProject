@@ -60,6 +60,27 @@ def split_nodes_delimter(old_nodes, delimiter, text_type):
                 new_nodes.append(TextNode(part, TextType.CODE, node.url))
     return new_nodes
 
+def extract_markdown_images(text):
+    import re
+    image_pattern = re.compile(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)")
+    matches = image_pattern.findall(text)
+    images = []
+    for alt_text, url in matches:
+        images.append((alt_text, url))
+    return images
+
+def extract_markdown_links(text):
+    import re
+    link_pattern = re.compile(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)")
+    matches = link_pattern.findall(text)
+    links = []
+    for text, url in matches:
+        links.append((text, url))
+    return links
+
+
+    
+
                         
     
                         

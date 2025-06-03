@@ -29,6 +29,11 @@ def main():
     print(new_input_node.to_html())
     new_parent_node = ParentNode("div", [new_leaf_node, new_text_node, new_input_node], props={"id": "main"})
     print(repr(new_parent_node))
+    print()
+    image_link_raw_text = "This is an image: ![alt text](https://example.com/image.jpg)"
+    regular_link_raw_text = "This is a link: [Boot.dev](https://www.boot.dev)"
+    print("Raw text with image link:", image_link_raw_text)
+    print("Raw text with regular link:", regular_link_raw_text)
 
 
 

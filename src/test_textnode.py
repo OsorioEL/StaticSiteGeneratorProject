@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimter
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimter, extract_markdown_images, extract_markdown_links
 from htmlnode import LeafNode, ParentNode, HTMLNode
 
 
@@ -82,7 +82,13 @@ class TestTextNode(unittest.TestCase):
         with self.assertRaises(Exception) as context:
             split_nodes_delimter([node], delimiter, text_type)
         self.assertTrue("Unmatched delimiter in: This is a text node uneven `code delimiters" in str(context.exception))
-    
+        
+    def test_extract_markdown_images(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+        
         
     
 
