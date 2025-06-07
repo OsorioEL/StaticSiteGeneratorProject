@@ -1,6 +1,7 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimter, extract_markdown_images, extract_markdown_links
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimter, extract_markdown_images, extract_markdown_links, block_to_block_type, markdown_to_blocks
+from textnode import BlockType
 from htmlnode import LeafNode, ParentNode, HTMLNode
 
 
@@ -61,19 +62,19 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(new_nodes[6].text, "delimiters")
         
     def test_split_nodes_delimiter_with_list_of_nodes(self):
-        node1 = TextNode("This is a text inline `code` text", TextType.TEXT)
-        node2 = TextNode("Another text node with inline `again, code` 'text", TextType.TEXT)
-        delimiter = "`"
-        text_type = TextType.TEXT
-        new_nodes = split_nodes_delimter([node1, node2], delimiter, text_type)
-        #assert new nodes list consists of TextNodes with the text split by the delimiter
-        # and the text type is preserved
-        self.assertEqual(new_nodes[0],TextNode("This is a text inline ", TextType.TEXT))
-        self.assertEqual(new_nodes[1],TextNode("code", TextType.CODE))
-        self.assertEqual(new_nodes[2],TextNode(" text", TextType.TEXT))
-        self.assertEqual(new_nodes[3],TextNode("Another text node with inline ", TextType.TEXT))
-        self.assertEqual(new_nodes[4],TextNode("again, code", TextType.CODE))
-        self.assertEqual(new_nodes[5],TextNode(" 'text", TextType.TEXT))
+            node1 = TextNode("This is a text inline `code` text", TextType.TEXT)
+            node2 = TextNode("Another text node with inline `again, code` 'text", TextType.TEXT)
+            delimiter = "`"
+            text_type = TextType.CODE  # ✅ Correct now
+            new_nodes = split_nodes_delimter([node1, node2], delimiter, text_type)
+
+            self.assertEqual(new_nodes[0], TextNode("This is a text inline ", TextType.TEXT))
+            self.assertEqual(new_nodes[1], TextNode("code", TextType.CODE))
+            self.assertEqual(new_nodes[2], TextNode(" text", TextType.TEXT))
+            self.assertEqual(new_nodes[3], TextNode("Another text node with inline ", TextType.TEXT))
+            self.assertEqual(new_nodes[4], TextNode("again, code", TextType.CODE))
+            self.assertEqual(new_nodes[5], TextNode(" 'text", TextType.TEXT))
+
         
     def test_split_nodes_delimiter_raises_exception_on_even_split(self):
         node = TextNode("This is a text node uneven `code delimiters", TextType.TEXT)
@@ -88,9 +89,29 @@ class TestTextNode(unittest.TestCase):
             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
-        
-        
-    
+    def test_block_to_block_type_heading(self):
+        self.assertEqual(block_to_block_type("# Heading 1"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("# Another heading"), BlockType.HEADING)
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_block_to_block_type_code(self):
+        self.assertEqual(block_to_block_type("```python\nprint('hi')\n```"), BlockType.CODE)
+        self.assertEqual(block_to_block_type("```"), BlockType.CODE)
+
+    def test_block_to_block_type_quote(self):
+        self.assertEqual(block_to_block_type("> This is a quote"), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type(">Another quote"), BlockType.QUOTE)
+
+    def test_block_to_block_type_unordered_list(self):
+        self.assertEqual(block_to_block_type("- item 1"), BlockType.UNORDERED_LIST)
+        self.assertEqual(block_to_block_type("* item 2"), BlockType.UNORDERED_LIST)
+
+    def test_block_to_block_type_ordered_list(self):
+        self.assertEqual(block_to_block_type("1. First item"), BlockType.ORDERED_LIST)
+        self.assertEqual(block_to_block_type("23. Another item"), BlockType.ORDERED_LIST)
+
+    def test_block_to_block_type_paragraph(self):
+        self.assertEqual(block_to_block_type("Just a normal paragraph."), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type("Another line of text."), BlockType.PARAGRAPH)
+
+        
+        
