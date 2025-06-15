@@ -89,6 +89,7 @@ class TestTextNode(unittest.TestCase):
             "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
+        
     def test_block_to_block_type_heading(self):
         self.assertEqual(block_to_block_type("# Heading 1"), BlockType.HEADING)
         self.assertEqual(block_to_block_type("# Another heading"), BlockType.HEADING)
